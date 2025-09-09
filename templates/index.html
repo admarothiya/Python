@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rock • Paper • Scissor</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='xyz.png') }}">
+
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="card">
+    <h1>Rock • Paper • Scissor</h1>
+    <p class="sub">chosse any one!</p>
+
+    <div class="buttons">
+      <button data-choice="rock">🪨 Rock</button>
+      <button data-choice="paper">📄 Paper</button>
+      <button data-choice="scissor">✂️ Scissor</button>
+    </div>
+
+    <div class="out">
+      <div class="row">
+        <div>your choice: <span id="u" class="badge">—</span></div>
+        <div>computer: <span id="c" class="badge">—</span></div>
+      </div>
+      <div style="margin-top:10px"><strong>result:</strong> <span id="r">—</span></div>
+      <div class="score">
+        <div>your choice: <strong id="us">0</strong></div>
+        <div>computer_choice: <strong id="cs">0</strong></div>
+        <div>draw: <strong id="ds">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btns = document.querySelectorAll("button[data-choice]");
+    const u = document.getElementById("u");
+    const c = document.getElementById("c");
+    const r = document.getElementById("r");
+    const us = document.getElementById("us");
+    const cs = document.getElementById("cs");
+    const ds = document.getElementById("ds");
+    let userScore=0, compScore=0, draws=0;
+
+    async function play(user) {
+      const res = await fetch("/play", {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ user_choice: user })
+      });
+      const data = await res.json();
+      if(data.error){ r.textContent = data.error; return; }
+
+      u.textContent = data.user_choice;
+      c.textContent = data.computer_choice;
+      r.textContent = data.message;
+
+      if (data.result === "draw") { draws++; ds.textContent = draws; }
+      else if (data.result === "user") { userScore++; us.textContent = userScore; }
+      else { compScore++; cs.textContent = compScore; }
+    }
+
+    btns.forEach(b => b.addEventListener("click", ()=> play(b.dataset.choice)));
+  </script>
+</body>
+</html>
